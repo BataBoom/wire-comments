@@ -8,29 +8,28 @@
             <div>
                 <div class="flex items-center space-x-2">
                     @if (!$comment->guest_id)
-                        <img src="{{ $comment->user->profile_photo_url ?? 'https://ui-avatars.com/api/name=du' }}"
+                        <img src="{{ $comment->user->avatar() }}"
                              alt="{{ $comment->user->name ?? '' }}"
                              class="size-8 bg-black rounded-full"/>
                         <div class="font-semibold dark:text-white">
                             {{ $comment->user->name ?? '[deleted user]' }}
                         </div>
-                    @elseif($comment->guest_id || $comment->user_id)
-                        <img src="{{ $comment->user->profile_photo_url ?? 'https://ui-avatars.com/api/name=guest' }}"
+                    @elseif($comment->guest_id)
+                        <img src="https://ui-avatars.com/api/name=guest"
                              alt="Guest User"
                              class="size-8 bg-black rounded-full"/>
                         <div class="font-semibold dark:text-white">
                             Guest User
                         </div>
                     @else
-                        <img src="{{ $comment->user->profile_photo_url ?? 'https://ui-avatars.com/api/name=du' }}"
+                        <img src="{{ $comment->user->avatar() }}"
                              alt="{{ $comment->user->name ?? '' }}"
                              class="size-8 bg-black rounded-full"/>
                         <div class="font-semibold dark:text-white">
                             {{ $comment->user->name ?? '[deleted user]' }}
                         </div>
                     @endif
-                    <div class="text-sm text-gray-400" x-human-date
-                         datetime="{{ $comment->created_at->toDateTimeString() }}"></div>
+                    <p class="text-sm text-black">{{ $comment->created_at->diffForHumans() }}</p>
                 </div>
                 @if ($this->authorizeGuest() || $comment->user_id === auth()->id())
                     <template x-if="editing">
@@ -49,7 +48,7 @@
                                     class="inline-flex items-center px-4 py-2 bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-600 focus:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150">
                                 Save
                             </button>
-                            <button class="ml-2 text-sm text-gray-400" x-on:click="editing = false">Cancel</button>
+                            <button class="ml-2 text-sm text-gray-800" x-on:click="editing = false">Cancel</button>
                         </form>
                     </template>
                 @endif
@@ -64,12 +63,12 @@
                 </div>
                 <div class="mt-6 text-sm flex items-center space-x-3">
                     @if ($this->allowGuests || auth()->user())
-                        <button x-on:click="replying = true" class="text-gray-400">
+                        <button x-on:click="replying = true" class="btn btn-sm btn-primary">
                             Reply
                         </button>
                     @endif
                     @if ($this->authorizeGuest())
-                        <button x-on:click="editing = true" class="text-gray-400">
+                        <button x-on:click="editing = true" class="btn btn-sm">
                             Edit
                         </button>
                         <div x-data="{ open: false }" class="relative">
@@ -94,14 +93,14 @@
                         </div>
                     @else
                         @can('edit', $comment)
-                            <button x-on:click="editing = true" class="text-gray-400">
+                            <button x-on:click="editing = true" class="btn btn-sm btn-warning">
                                 Edit
                             </button>
                         @endcan
                         @can('delete', $comment)
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open"
-                                        class="text-gray-400">
+                                        class="btn btn-sm btn-error">
                                     Delete
                                 </button>
 
@@ -138,14 +137,14 @@
                                 class="inline-flex items-center px-4 py-2 bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-600 focus:bg-gray-600 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150">
                             Reply
                         </button>
-                        <button class="ml-2 text-sm text-gray-400" x-on:click="replying = false">Cancel</button>
+                        <button class="btn btn-sm btn-warning" x-on:click="replying = false">Cancel</button>
                     </form>
                 </template>
 
                 @if ($comment->children->count())
                     @if ($depth < $maxDepth)
                         @foreach($comment->children as $child)
-                            <div class="ml-8 mt-8" wire:key="{{ $child->id }}">
+                            <div class="ml-8 mt-8 border-b border-gray-700 last:border-b-0" wire:key="{{ $child->id }}">
                                 <livewire:comment-item :allowGuests="$allowGuests" :emojis="$emojis" :key="$child->id"
                                                        :comment="$child"
                                                        :depth="$depth + 1" :max-depth="$maxDepth"/>
